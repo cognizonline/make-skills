@@ -38,18 +38,20 @@ claude
 /plugin add /path/to/make-skills
 ```
 
-### Claude Cowork / Claude Chat
+### Claude.ai (Skills capability) & Claude Cowork
 
-Download individual skills as zip files and upload to your project:
+Download the `.skill` file for the skill you need, then upload it in **Settings → Capabilities → Skills** on claude.ai (or via the Skills uploader in Cowork).
 
 | Skill | Download |
 |-------|----------|
-| Scenario Building | [Download](https://raw.githubusercontent.com/integromat/make-skills/main/dist/make-scenario-building.zip) |
-| Module Configuring | [Download](https://raw.githubusercontent.com/integromat/make-skills/main/dist/make-module-configuring.zip) |
-| MCP Reference | [Download](https://raw.githubusercontent.com/integromat/make-skills/main/dist/make-mcp-reference.zip) |
-| API Shell + Connection Workflow | [Download](https://raw.githubusercontent.com/integromat/make-skills/main/dist/make-api-shell-connection-workflow.zip) |
+| Scenario Building | [Download .skill](https://raw.githubusercontent.com/integromat/make-skills/main/dist/make-scenario-building.skill) |
+| Module Configuring | [Download .skill](https://raw.githubusercontent.com/integromat/make-skills/main/dist/make-module-configuring.skill) |
+| MCP Reference | [Download .skill](https://raw.githubusercontent.com/integromat/make-skills/main/dist/make-mcp-reference.skill) |
+| API Shell + Connection Workflow | [Download .skill](https://raw.githubusercontent.com/integromat/make-skills/main/dist/make-api-shell-connection-workflow.skill) |
 
-Or download the [complete bundle](https://raw.githubusercontent.com/integromat/make-skills/main/dist/make-skills.zip) with all 4 skills + MCP config.
+> The `.skill` extension is required. Uploading the equivalent `.zip` only registers the top-level `SKILL.md` — sibling reference files (`connections.md`, `routing.md`, `iml-expressions.md`, …) are not extracted, which breaks progressive disclosure. The `.zip` versions remain available at the same URL with the `.zip` extension for Codex, Open Agent Skills, and manual installs.
+
+The complete 4-skill bundle for Claude Code is distributed as a single zip: [make-skills.zip](https://raw.githubusercontent.com/integromat/make-skills/main/dist/make-skills.zip).
 
 ### Codex
 

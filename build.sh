@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
 # Build script for make-skills distribution packages
-# Creates zip files for Claude Desktop/Claude.ai (individual skills) and Claude Code (bundle)
+# Creates per-skill archives (.zip for Codex/OAS/manual, .skill for Claude.ai/Cowork)
+# and a complete bundle .zip (for Claude Code plugin install).
 #
 # Artifact strategy:
-#   dist/<name>.zip          — stable aliases, committed to main for raw downloads
-#   dist/<name>-v<ver>.zip   — versioned, gitignored, attached to GitHub Releases
+#   dist/<name>.zip            — stable aliases, committed to main (Codex, OAS, manual install)
+#   dist/<name>.skill          — stable aliases, committed to main (Claude.ai Skills capability, Cowork)
+#   dist/<name>-v<ver>.zip     — versioned, gitignored, attached to GitHub Releases
+#   dist/<name>-v<ver>.skill   — versioned, gitignored, attached to GitHub Releases
 #
 # After building, publish versioned artifacts to a release:
-#   gh release create v${VERSION} dist/*-v${VERSION}.zip
+#   gh release create v${VERSION} dist/*-v${VERSION}.zip dist/*-v${VERSION}.skill
 
 set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
@@ -47,6 +50,12 @@ for skill in "${SKILLS[@]}"; do
     (cd "$TMPDIR" && zip -rq "$DIST_DIR/${skill}-v${VERSION}.zip" "$skill/" -x "*.DS_Store")
     # Stable alias (version-free) so docs don't 404 after a bump
     cp "$DIST_DIR/${skill}-v${VERSION}.zip" "$DIST_DIR/${skill}.zip"
+    # Mirror as .skill (Anthropic Claude.ai / Cowork Skills format — same zip, different extension).
+    # Uploading the .zip variant to claude.ai's Skills capability only registers the top-level
+    # SKILL.md; the .skill extension is required for sibling reference files to land in
+    # /mnt/skills/user/<skill>/ and keep progressive disclosure working.
+    cp "$DIST_DIR/${skill}-v${VERSION}.zip" "$DIST_DIR/${skill}-v${VERSION}.skill"
+    cp "$DIST_DIR/${skill}.zip" "$DIST_DIR/${skill}.skill"
 done
 
 # Build complete bundle (for Claude Code)
@@ -70,11 +79,13 @@ cp "$DIST_DIR/make-skills-v${VERSION}.zip" "$DIST_DIR/make-skills.zip"
 echo ""
 echo "Build complete! Files in dist/:"
 echo ""
-echo "Individual skills (Claude Desktop / Claude.ai):"
+echo "Individual skills (Claude.ai Skills capability / Cowork: .skill; Codex / OAS / manual: .zip):"
 for skill in "${SKILLS[@]}"; do
     SIZE=$(du -h "$DIST_DIR/${skill}-v${VERSION}.zip" | cut -f1)
-    echo "  ${skill}-v${VERSION}.zip  ${SIZE}"
-    echo "  ${skill}.zip  (stable alias)"
+    echo "  ${skill}-v${VERSION}.zip    ${SIZE}"
+    echo "  ${skill}.zip    (stable alias)"
+    echo "  ${skill}-v${VERSION}.skill  ${SIZE}"
+    echo "  ${skill}.skill  (stable alias)"
 done
 echo ""
 echo "Complete bundle (Claude Code):"
