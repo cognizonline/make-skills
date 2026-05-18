@@ -15,6 +15,34 @@ See [examples/full-blueprint.json](./examples/full-blueprint.json) for a complet
 
 The `flow` array contains modules executed in sequence. Each module can have nested flows via `routes` (for routers) or `onerror` (for error handlers).
 
+### Real-world template examples
+
+The teaching blueprints above are deliberately stripped to highlight structure. When a real mapper expression, `restore` metadata block, scheduling shape, or production-shaped module config is needed, consult the top-10-by-usage public templates kept under [examples/popular-templates/](./examples/popular-templates/). Each file is the full Make API response (`blueprint`, `controller`, `scheduling`; most also include `metadata.templateUrl` and `metadata.usage`) — copy the relevant module config and adapt rather than reconstructing from scratch.
+
+Match a planned scenario to the closest analogue:
+
+**Linear 2-module (trigger → action):**
+- [02-add-webhook-data-to-google-sheet.json](./examples/popular-templates/02-add-webhook-data-to-google-sheet.json) — `gateway:CustomWebHook` → `google-sheets:addRow`
+- [04-send-gmail-from-google-sheets-row.json](./examples/popular-templates/04-send-gmail-from-google-sheets-row.json) — `google-sheets:watchRows` → `google-email:ActionSendEmail`
+- [05-facebook-leads-to-google-sheets.json](./examples/popular-templates/05-facebook-leads-to-google-sheets.json) — `facebook-lead-ads:NewLeadMultiple` → `google-sheets:addRow`
+- [06-whatsapp-basic-chatbot.json](./examples/popular-templates/06-whatsapp-basic-chatbot.json) — `whatsapp-business-cloud:watchEvents` → `whatsapp-business-cloud:sendMessage`
+- [07-incoming-emails-to-google-sheets.json](./examples/popular-templates/07-incoming-emails-to-google-sheets.json) — `email:TriggerNewEmail` (IMAP) → `google-sheets:addRow`
+
+**Linear 3-module AI enrichment:**
+- [01-chatgpt-completions-from-google-sheets.json](./examples/popular-templates/01-chatgpt-completions-from-google-sheets.json) — `watchRows` → `openai-gpt-3:CreateCompletion` → `updateRow`. Canonical reference for the row-level AI enrichment pattern, including `{{1.\`0\`}}` column mapping and `mapper.rowNumber: "{{1.\`__ROW_NUMBER__\`}}"` for write-back.
+- [03-chatgpt-telegram-bot.json](./examples/popular-templates/03-chatgpt-telegram-bot.json) — `telegram:WatchUpdates` → `openai-gpt-3:CreateCompletion` → `telegram:SendReplyMessage`
+
+**Iterator (BasicFeeder):**
+- [09-save-gmail-attachments-to-drive.json](./examples/popular-templates/09-save-gmail-attachments-to-drive.json) — `google-email:TriggerNewEmail` → `builtin:BasicFeeder` (iterates `{{4.attachments}}`) → `google-drive:uploadAFile`. The canonical shape for breaking an array bundle into per-item executions.
+
+**Router with branching/fanout:**
+- [08-summarize-website-and-create-social-posts.json](./examples/popular-templates/08-summarize-website-and-create-social-posts.json) — `browse-ai:onTaskFinished` → `builtin:BasicRouter` fanning out to ChatGPT-summarize-then-post on LinkedIn and Facebook. Reference for multi-platform fanout where each route is independent.
+- [10-sync-notion-to-google-calendar.json](./examples/popular-templates/10-sync-notion-to-google-calendar.json) — `notion:watchDatabaseItems` → router with create/update/delete branches against Google Calendar. Reference for state-routing on a single bundle (created vs. updated vs. archived).
+
+When the user's request is a near-match for one of these, copy the module sequence and `mapper`/`parameters` shape directly, then swap connection IDs and resource IDs. When it diverges, treat the file as a structural reference for the modules it shares.
+
+Before reusing any of these files as a blueprint, see [`examples/popular-templates/README.md`](./examples/popular-templates/README.md) — hardcoded resource IDs have been emptied to `""` and need to be supplied, and real-world module IDs are often non-sequential and must be renumbered to satisfy the construction rules below.
+
 ## Module Structure
 
 ```json
