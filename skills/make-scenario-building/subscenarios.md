@@ -25,11 +25,13 @@ Subscenarios allow you to break complex automations into smaller, reusable scena
 | **Synchronous** | Parent calls subscenario, pauses, waits for outputs, then resumes. Use when the parent needs results. |
 | **Asynchronous** | Parent calls subscenario and continues immediately without waiting. Use for fire-and-forget tasks. |
 
-### Key Modules
+### Key Modules (app: `scenario-service@2`)
 
-- **`Scenarios > Call a scenario`** — In the parent scenario. Passes inputs and (in sync mode) receives outputs.
-- **`Scenarios > Start scenario`** — The trigger module in the subscenario. Receives inputs from the parent.
-- **`Scenarios > Return outputs`** — In the subscenario. Sends results back to the parent (sync mode only).
+| Label | Module ID | Role |
+|---|---|---|
+| Call a scenario | `scenario-service:CallSubscenario` | In the parent — passes inputs, receives outputs |
+| Start scenario | `scenario-service:StartSubscenario` | Trigger in the subscenario |
+| Return output | `scenario-service:ReturnData` | Final module in the subscenario (sync only) |
 
 ### Inputs and Outputs
 

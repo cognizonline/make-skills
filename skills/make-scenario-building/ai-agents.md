@@ -144,12 +144,14 @@ Key rules:
 
 ## Scenario Tools: Requirements
 
-To use a subscenario as a tool, the subscenario **must**:
+A scenario tool uses `scenario-service:CallSubscenario` as a module tool in the agent's `flow`. The target subscenario **must**:
 
 1. Be **active** and scheduled **"On demand"**
-2. Use `Scenarios > Start scenario` as its trigger
-3. End with `Scenarios > Return outputs` (delete this module only for async fire-and-forget)
+2. Use `scenario-service:StartSubscenario` as its trigger
+3. End with `scenario-service:ReturnData` (omit only for async fire-and-forget)
 4. Have **named input/output fields** defined accurately — mismatched field names cause silent data loss
+
+The subscenario's inputs and outputs are resolved dynamically from its defined interface — do not hand-write the blueprint JSON. Configure in the Make UI and extract via `scenarios_get` if you need the raw structure.
 
 Use scenario tools when the logic needs multiple modules, filters, or specific I/O contracts. Use module tools for single-module actions.
 
