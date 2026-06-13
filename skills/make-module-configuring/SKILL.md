@@ -31,6 +31,7 @@ Read the reference file that matches the current task:
 | Adding filter conditions | [Filtering](./filtering.md) — operators, AND/OR grouping, placement rules |
 | Configuring an aggregator | [Aggregators](./aggregators.md) — feeder/target, variants, configuration order exception |
 | Configuring an AI agent module | [AI Agents](./ai-agents.md) — tools array, AI-decided fields, restore metadata |
+| Using Make AI Toolkit (extractors, web search) | [Make AI Toolkit](./make-ai-toolkit.md) — `make-ai-extractors` + `make-ai-web-search` module IDs, content pipelines |
 
 ## Cardinal Rules
 

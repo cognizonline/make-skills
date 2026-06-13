@@ -100,16 +100,107 @@ The `RpcGetModels` RPC often fails in MCP context due to org-level restrictions.
 
 | Model ID | Notes |
 |---|---|
-| `claude-opus-4-5` | Most capable Claude |
-| `claude-sonnet-4-5` | Balanced Claude |
-| `claude-haiku-4-5` | Fast, lightweight Claude |
+| `claude-opus-4-7` | Most capable Claude 4 |
+| `claude-sonnet-4-6` | Balanced Claude 4 (default choice) |
+| `claude-haiku-4-5-20251001` | Fast, lightweight Claude |
 
 If `RpcGetModels` succeeds, prefer the returned list. If it fails, pick from the known IDs above based on the user's chosen provider.
 
+## Output Field: `response` NOT `output`
+
+**Critical:** Reference the agent's text output as `{{N.response}}`, not `{{N.output}}`.
+
+- Correct: `{{2.response}}`
+- Wrong: `{{2.output}}` — always empty, will silently break downstream modules
+
+Additional output fields: `{{N.metadata}}` (steps + token usage), `{{N.reasoning}}` (reasoning models only).
+
+## System Prompt Design Pattern
+
+Effective agent instructions follow this structure:
+
+```
+You are a [role] that [core purpose].
+
+## Steps
+1. [First action] using [Tool Name]
+2. [Second action] using [Tool Name]
+3. [Conditional logic]: if [condition], use [Tool A]; otherwise use [Tool B]
+
+## Rules
+- Only use [Tool X] when [condition]
+- Never [prohibited action]
+- If [edge case], [fallback behavior]
+
+## Output format
+[Exact format specification — JSON keys, plain text structure, etc.]
+```
+
+Key rules:
+- Reference tool names exactly as defined in the tool's `name` field
+- Use numbered lists for sequential steps — the model follows order more reliably
+- Include sample input/output in the instructions for complex data shapes
+- Specify what to do when a tool returns empty or fails
+
+## Scenario Tools: Requirements
+
+To use a subscenario as a tool, the subscenario **must**:
+
+1. Be **active** and scheduled **"On demand"**
+2. Use `Scenarios > Start scenario` as its trigger
+3. End with `Scenarios > Return outputs` (delete this module only for async fire-and-forget)
+4. Have **named input/output fields** defined accurately — mismatched field names cause silent data loss
+
+Use scenario tools when the logic needs multiple modules, filters, or specific I/O contracts. Use module tools for single-module actions.
+
+## Content Extraction and the Make AI Toolkit
+
+Make provides two built-in AI utility apps for pre-processing content before it reaches an agent:
+
+**`make-ai-extractors`** — document, image, and audio extraction:
+- `make-ai-extractors:extractADocument` — extract text from PDFs, DOCX, and other documents (use this for most document pipelines)
+- `make-ai-extractors:extractTextFromAnImage` — OCR for image files containing text
+- `make-ai-extractors:describeAnImage` — detailed image description
+- `make-ai-extractors:transcribeAnAudio` — speech to text
+- `make-ai-extractors:extractAnInvoice` / `extractAReceipt` — structured document extraction
+
+**`make-ai-web-search`** — live web grounding:
+- `make-ai-web-search:generateAResponse` — grounded answer from live web search; can also fetch and process specific URLs
+
+### Common patterns
+
+Pre-extract text before the agent (preferred for documents — avoids file-input token overhead):
+```
+[File source] → make-ai-extractors:extractADocument → ai-local-agent [message: "{{N.text}}"]
+```
+
+Pass binary files directly to the agent (use only when agent needs to reason over the raw file):
+```
+ai-local-agent mapper: files: [{fileName: "{{N.fileName}}", data: "{{N.data}}"}]
+```
+Supported agent file input types: JPG, PNG, GIF, PDF only — all other formats must be pre-extracted.
+
+Attach as module tools so the agent decides when to invoke them:
+```
+tools:
+  - name: "Extract document text"
+    description: "Extracts text from a PDF or document."
+    flow: [make-ai-extractors:extractADocument]
+  - name: "Search the web"
+    description: "Returns a grounded answer from live web search."
+    flow: [make-ai-web-search:generateAResponse]
+```
+
+For large reference documents, use Knowledge upload (persistent RAG) rather than per-execution file input.
+
+See [Make AI Toolkit](../make-module-configuring/make-ai-toolkit.md) for the full module list and configuration details.
+
 ## Gotchas
 
+- **`{{N.response}}` not `{{N.output}}`** — the agent's result is in `response`. `output` is always empty.
 - **Non-deterministic.** The agent may behave differently for similar inputs. If you need predictable, repeatable logic, use Router or If-Else instead.
 - **Module tools = one module each.** For multi-step tool logic, use Scenario tools instead.
+- **Scenario tool subscenario must be active + on-demand.** An inactive or scheduled subscenario cannot be called as a tool.
 - **Single bundle output.** Regardless of how many tools the agent calls, it produces one output bundle.
 - **Cost and latency.** AI agent modules call an LLM and potentially multiple tools. They are slower and more expensive than deterministic modules.
 - **Knowledge vs Input.** Knowledge is persistent reference material (uploaded files). Input is per-execution data from the incoming bundle. Don't confuse the two. Text file input consumes significant memory; knowledge files are preferable for large documents.
