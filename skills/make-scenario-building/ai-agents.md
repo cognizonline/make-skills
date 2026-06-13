@@ -75,36 +75,19 @@ Without a tool, the agent will either:
 
 Example: A weather forecast agent needs a `weather:ActionGetDailyForecast` (or `weather:ActionGetCurrentWeather`) tool attached — without it, it cannot return real forecasts.
 
-## Known Model IDs
+## Model Selection
 
-The `RpcGetModels` RPC often fails in MCP context due to org-level restrictions. When it does, use these known model IDs directly in `defaultModel`:
+Model IDs and tier names change. Do **not** hardcode a table of "latest" model IDs into a blueprint unless it was verified for the target team during the current build session.
 
-### Google Gemini (`gemini-ai-*` connection)
+Use this resolution order:
 
-| Model ID | Notes |
-|---|---|
-| `gemini-2.5-pro-preview-03-25` | Latest Gemini 2.5 Pro preview |
-| `gemini-2.0-flash` | Fast, efficient Gemini 2.0 |
-| `gemini-1.5-pro` | Stable Gemini 1.5 Pro |
-| `gemini-1.5-flash` | Fast Gemini 1.5 |
+1. Prefer the module's model/options RPC if it works in the target organization.
+2. If the RPC fails, inspect the Make UI dropdown for the selected AI provider and copy the exact value.
+3. If using Make AI Provider tiers, use the currently verified tier slugs `small`, `medium`, or `large` only after confirming the target module accepts them.
+4. If using a direct provider connection such as OpenAI, Anthropic, or Gemini, use provider-specific model IDs returned by the module/RPC/UI for that provider.
+5. Never label an ID as "latest" in docs; at most call it an example observed in a specific exported scenario.
 
-### OpenAI (`openai-gpt-3` connection)
-
-| Model ID | Notes |
-|---|---|
-| `gpt-4o` | Latest GPT-4o |
-| `gpt-4o-mini` | Smaller, faster GPT-4o |
-| `gpt-4-turbo` | GPT-4 Turbo |
-
-### Anthropic (`anthropic-claude` connection)
-
-| Model ID | Notes |
-|---|---|
-| `claude-opus-4-7` | Most capable Claude 4 |
-| `claude-sonnet-4-6` | Balanced Claude 4 (default choice) |
-| `claude-haiku-4-5-20251001` | Fast, lightweight Claude |
-
-If `RpcGetModels` succeeds, prefer the returned list. If it fails, pick from the known IDs above based on the user's chosen provider.
+Provider-specific examples in old templates are historical references, not a source of truth. If a model value fails validation or runtime, re-check the module dropdown and update the blueprint.
 
 ## Output Field: `response` NOT `output`
 
@@ -154,6 +137,8 @@ A scenario tool uses `scenario-service:CallSubscenario` as a module tool in the 
 The subscenario's inputs and outputs are resolved dynamically from its defined interface — do not hand-write the blueprint JSON. Configure in the Make UI and extract via `scenarios_get` if you need the raw structure.
 
 Use scenario tools when the logic needs multiple modules, filters, or specific I/O contracts. Use module tools for single-module actions.
+
+Do not use `scenarios:CallAScenario`; that app/module ID is invalid for this pattern. Use the `scenario-service` modules listed above and verify them in the target team with module discovery or an exported Make blueprint.
 
 ## Content Extraction and the Make AI Toolkit
 

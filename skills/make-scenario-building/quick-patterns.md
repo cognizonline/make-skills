@@ -77,7 +77,7 @@ Goal: Watch new rows, send a column value to AI, write the AI response back to t
 4. rpc_execute                   → Spreadsheets RPC (resolve spreadsheet ID)
 5. rpc_execute                   → Sheets RPC (resolve sheet tab ID)
 6. app-module_get                → ai-tools:Ask (outputFormat: "instructions")
-   ⚠ Do NOT call RpcGetModels — it fails via MCP. Use tier names: "low", "medium", "high"
+   [warn] If RpcGetModels fails via MCP, use verified Make AI Provider tier names: "small", "medium", "large"
 7. app-module_get                → google-sheets:updateRow (outputFormat: "instructions")
 8. Construct blueprint JSON      → Build blueprint with all three modules (see blueprint-construction.md):
    - watchRows                   → parameters: connection, spreadsheetId, sheetId, includesHeaders: true, limit, tableFirstRow

@@ -452,24 +452,23 @@ Always provide either `end` OR `duration`, never neither. If using `end`, comput
 |--------------------|-----------------------------------------------------------------------------|
 | `ai-tools:Ask`     | Make AI Toolkit — Simple Text Prompt (connection field: `makeConnectionId`) |
 
-> **Note:** `ai-tools:Ask` uses `makeConnectionId` instead of `__IMTCONN__` for its connection parameter. The connection type is `ai-provider` and model values are abstract tier names (`"low"`, `"medium"`, `"high"`).
+> **Note:** `ai-tools:Ask` uses `makeConnectionId` instead of `__IMTCONN__` for its connection parameter. The connection type is `ai-provider` and model values are abstract tier names (`"small"`, `"medium"`, `"large"`) when verified for the target module.
 
 ### Make AI Tools: Model Parameter
 
 The `ai-tools:Ask` module (and other Make AI Toolkit modules) use abstract model **tier names**,
 not provider-specific model IDs. The `model` parameter goes in `parameters` (static), not `mapper`.
 
-**`model` is required — there is no default.** Omitting it causes a 400 error at runtime. Do not use provider-specific model IDs (e.g., `"gpt-4o-mini"`, `"claude-sonnet-4-5"`) with the Make AI Provider — only tier names are valid.
+**`model` is required - there is no default.** Omitting it causes a 400 error at runtime. Do not use provider-specific model IDs with the Make AI Provider - only verified tier names are valid.
 
 Known tier values for `"makeConnectionId"` with Make's AI Provider (`ai-provider`):
 | Value | Label | Description |
 |-------|-------|-------------|
-| `"low"` | Small/Fast model | Lightweight, fast, cheap — simple classification tasks |
-| `"medium"` | Medium model | Balanced — most text generation use cases (default choice) |
-| `"high"` | Large/Powerful model | Complex reasoning, long outputs |
+| `"small"` | Small/Fast model | Lightweight, fast, cheap - simple classification tasks |
+| `"medium"` | Medium model | Balanced - most text generation use cases |
+| `"large"` | Large/Powerful model | Complex reasoning, long outputs |
 
-The `RpcGetModels` RPC that normally populates this list **fails via MCP** due to an org-context
-limitation. Always use the tier names above directly — do not attempt to resolve the RPC.
+The `RpcGetModels` RPC can fail via MCP due to org-context limitations. If it fails, use the Make UI dropdown or a known-good exported scenario from the same team; still validate the module before deployment.
 
 ```json
 {
@@ -487,15 +486,15 @@ limitation. Always use the tier names above directly — do not attempt to resol
 ```
 
 For custom AI provider connections (OpenAI, Anthropic), the model values are provider-specific
-IDs (e.g., `"gpt-4o-mini"`, `"claude-3-haiku-20240307"`). Only the Make AI Provider uses tiers.
+IDs returned by that provider/module. Only the Make AI Provider uses tiers.
 
 **Fallback when Make AI Provider is unavailable:** If the user has no `ai-provider` connection (or cannot create one due to plan limitations), check `connections_list` for alternative AI provider connections and use the corresponding app-specific module instead of `ai-tools:Ask`:
 
 | Connection `accountName` | App module alternative | Model ID format |
 |---|---|---|
-| `openai-gpt-3` | `openai:CreateChatCompletion` | Provider-specific: `"gpt-4o"`, `"gpt-4o-mini"` |
-| `anthropic-claude` | Anthropic app modules | Provider-specific: `"claude-sonnet-4-5"`, `"claude-haiku-4-5"` |
-| `gemini-ai-*` | Gemini app modules | Provider-specific: `"gemini-2.0-flash"`, `"gemini-1.5-pro"` |
+| `openai-gpt-3` | OpenAI app modules | Provider-specific model IDs from that module/RPC/UI |
+| `anthropic-claude` | Anthropic app modules | Provider-specific model IDs from that module/RPC/UI |
+| `gemini-ai-*` | Gemini app modules | Provider-specific model IDs from that module/RPC/UI |
 
 These modules use `__IMTCONN__` (not `makeConnectionId`) and accept provider-specific model IDs. Call `app_modules_list` for the specific app to discover available modules and `app-module_get` for configuration details.
 

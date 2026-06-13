@@ -48,7 +48,7 @@
 				"makeConnectionId": 14613
 			},
 			"mapper": {
-				"defaultModel": "gpt-5.4",
+				"defaultModel": "<model_id_or_tier_verified_in_make>",
 				"systemPrompt": "You're a versatile Agent",
 				"message": "{{1.message}}",
 				"files": [],
@@ -79,7 +79,7 @@
 						"defaultModel": {
 							"mode": "chose",
 							"nested": [],
-							"label": "GPT-5.4The frontier model for broad, general-purpose work and coding, delivering higher-quality outputs for complex tasks"
+							"label": "Verified model from Make UI/RPC"
 						},
 						"files": {
 							"mode": "chose"

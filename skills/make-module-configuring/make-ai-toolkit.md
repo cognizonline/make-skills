@@ -7,6 +7,9 @@ description: Make AI Toolkit modules — make-ai-extractors (document/image/audi
 
 Make provides two built-in AI utility apps for content processing. These are commonly used to pre-process inputs before passing them to an AI agent, or as module tools attached directly to an agent.
 
+
+Before building a production blueprint, verify each module ID in the target team with `app_modules_list` / `app_module_get` or by exporting a scenario from Make. Tool availability can vary by plan, region, and product rollout state.
+
 ## `make-ai-extractors` — Extraction Modules
 
 | Module ID | Label | Description |

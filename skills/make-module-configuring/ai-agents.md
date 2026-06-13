@@ -21,7 +21,7 @@ These are configured in the Make UI, not via blueprint mapper fields.
 
 | Field | Type | Description |
 |---|---|---|
-| `defaultModel` | select | LLM model to use (e.g., `"gpt-5.4"`). Resolve options via RPC. |
+| `defaultModel` | select | LLM model to use. Resolve options via RPC or the Make UI dropdown for the target AI provider; do not guess or label static IDs as latest. |
 | `systemPrompt` | text | Agent instructions — role, goals, constraints, step-by-step behavior. |
 | `message` | text | Input to the agent (typically mapped from upstream module output). Required. |
 | `files` | array | Input files — each with `fileName` (filename) and `data` (buffer). Supported input formats: JPG, PNG, GIF, PDF. |
@@ -269,6 +269,19 @@ A **scenario tool** wraps an entire subscenario as an agent tool using the `scen
 The subscenario's input fields are **dynamic** — they are nested under the `scenario` parameter and resolved at blueprint time from the subscenario's defined input interface (`rpc://GetInputInterface`). Outputs are likewise dynamic (`rpc://GetOutputInterface`).
 
 Because inputs and outputs are dynamic, **do not hand-write scenario tool blueprint JSON** — configure the tool in the Make UI and call `scenarios_get` on the parent scenario to extract the exact generated structure.
+
+### Safe construction workflow
+
+Use this workflow instead of guessing blueprint fields:
+
+1. Build or select the child scenario with `scenario-service:StartSubscenario` as the first module.
+2. Define the child scenario input interface in Make with stable field names.
+3. End the child scenario with `scenario-service:ReturnData` and define output fields.
+4. Activate the child scenario and set scheduling to **On demand**.
+5. In the parent agent, add a Scenario tool through the Make UI, or discover `scenario-service:CallSubscenario` with `app_modules_list` / `app_module_get`.
+6. Validate the generated module configuration, then extract the parent scenario with `scenarios_get` and reuse that exact dynamic mapper shape.
+
+Do not use `scenarios:CallAScenario`; that app/module ID is not valid for the Scenarios app used here.
 
 ## Gotchas
 
