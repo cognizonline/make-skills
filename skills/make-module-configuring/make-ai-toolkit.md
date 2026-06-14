@@ -40,7 +40,7 @@ Pre-extract text before sending to an agent. Avoids file input token overhead fo
 
 ```
 [File source] → make-ai-extractors:extractADocument → ai-local-agent:RunLocalAIAgent
-  agent mapper: message: "{{N.text}}"
+  agent mapper: message: "{{N.content}}"
 ```
 
 ### Image → Agent
@@ -83,6 +83,7 @@ ai-local-agent:RunLocalAIAgent
 ## Gotchas
 
 - **`extractADocument` vs `extractTextFromAnImage`** — use `extractADocument` for PDFs and Office files; use `extractTextFromAnImage` only for pure image files with text (scanned pages, photos of text).
+- **Output fields are module-specific** — `extractADocument` returns `{{N.content}}`; `describeAnImage` returns `{{N.description}}`; `make-ai-web-search:generateAResponse` returns `{{N.result}}`; `ai-tools:Ask` returns `{{N.answer}}`.
 - **`captionAnImageAdvanced` produces multiple bundles** — each caption is a separate bundle processed by the rest of the scenario. If you want a single output, aggregate after this module.
 - **`make-ai-web-search:generateAResponse`** can fetch specific URLs as well as run general web searches — useful when you need to retrieve and summarize a live webpage without a dedicated HTTP module.
 - **App version** — always use version `1` for both apps when building blueprints.

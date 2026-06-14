@@ -158,7 +158,7 @@ Make provides two built-in AI utility apps for pre-processing content before it 
 
 Pre-extract text before the agent (preferred for documents — avoids file-input token overhead):
 ```
-[File source] → make-ai-extractors:extractADocument → ai-local-agent [message: "{{N.text}}"]
+[File source] → make-ai-extractors:extractADocument → ai-local-agent [message: "{{N.content}}"]
 ```
 
 Pass binary files directly to the agent (use only when agent needs to reason over the raw file):
@@ -185,6 +185,7 @@ See [Make AI Toolkit](../make-module-configuring/make-ai-toolkit.md) for the ful
 ## Gotchas
 
 - **`{{N.response}}` not `{{N.output}}`** — the agent's result is in `response`. `output` is always empty.
+- **AI Toolkit output fields differ by module.** `extractADocument` returns `content`, image description returns `description`, web search returns `result`, and `ai-tools:Ask` returns `answer`.
 - **Non-deterministic.** The agent may behave differently for similar inputs. If you need predictable, repeatable logic, use Router or If-Else instead.
 - **Module tools = one module each.** For multi-step tool logic, use Scenario tools instead.
 - **Scenario tool subscenario must be active + on-demand.** An inactive or scheduled subscenario cannot be called as a tool.
